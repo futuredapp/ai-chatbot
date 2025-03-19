@@ -16,24 +16,24 @@ interface SuggestedActionsProps {
 function PureSuggestedActions({ chatId, append }: SuggestedActionsProps) {
   const suggestedActions = [
     {
-      title: 'What are the advantages',
-      label: 'of using Next.js?',
-      action: 'What are the advantages of using Next.js?',
+      title: 'Co je ETF?',
+      label: '',
+      action: 'Co je ETF?',
     },
     {
-      title: 'Write code to',
-      label: `demonstrate djikstra's algorithm`,
-      action: `Write code to demonstrate djikstra's algorithm`,
+      title: 'Jaké jsou tržní trendy?',
+      label: '',
+      action: 'Jaké jsou tržní trendy?',
     },
     {
-      title: 'Help me write an essay',
-      label: `about silicon valley`,
-      action: `Help me write an essay about silicon valley`,
+      title: 'Co je to Bull Market?',
+      label: '',
+      action: 'Co je to Bull Market?',
     },
     {
-      title: 'What is the weather',
-      label: 'in San Francisco?',
-      action: 'What is the weather in San Francisco?',
+      title: 'Mám se zajímat o investování?',
+      label: '',
+      action: 'Mám se zajímat o investování?',
     },
   ];
 

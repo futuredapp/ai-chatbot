@@ -16,6 +16,7 @@ import {
 export const myProvider = isTestEnvironment
   ? customProvider({
       languageModels: {
+        'chat-model-custom': chatModel,
         'chat-model-small': chatModel,
         'chat-model-large': chatModel,
         'chat-model-reasoning': reasoningModel,
@@ -25,6 +26,7 @@ export const myProvider = isTestEnvironment
     })
   : customProvider({
       languageModels: {
+        'chat-model-custom': openai('gpt-4o-mini'),
         'chat-model-small': openai('gpt-4o-mini'),
         'chat-model-large': openai('gpt-4o'),
         'chat-model-reasoning': wrapLanguageModel({

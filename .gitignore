@@ -7,11 +7,18 @@ node_modules
 
 # testing
 coverage
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/*
 
 # next.js
 .next/
 out/
 build
+
+# production
+dist/
 
 # misc
 .DS_Store
@@ -24,6 +31,7 @@ yarn-error.log*
 .pnpm-debug.log*
 
 # local env files
+.env
 .env.local
 .env.development.local
 .env.test.local
@@ -32,13 +40,38 @@ yarn-error.log*
 # turbo
 .turbo
 
-.env
+# vercel
 .vercel
-.vscode
-.env*.local
 
-# Playwright
-/test-results/
-/playwright-report/
-/blob-report/
-/playwright/*
+# editors
+.vscode
+.idea
+*.swp
+*.swo
+
+# typescript
+*.tsbuildinfo
+next-env.d.ts
+
+# database
+*.db
+*.sqlite
+*.sqlite3
+
+# logs
+logs/
+*.log
+
+# cache
+.cache/
+
+# drizzle
+.drizzle/
+
+# temporary files
+.temp
+.tmp
+temp/
+
+# build artifacts
+dist/
