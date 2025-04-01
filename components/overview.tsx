@@ -30,7 +30,7 @@ export const Overview = () => {
       
         
         <p className="italic text-sm">
-          "Metoda vytvořená Karlem Nejedlým pro moderního člověka, který hledá praktické a jednoduché řešení."
+          Metoda vytvořená Karlem Nejedlým pro moderního člověka, který hledá praktické a jednoduché řešení.
         </p>
       </div>
     </motion.div>
