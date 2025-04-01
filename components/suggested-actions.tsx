@@ -16,24 +16,24 @@ interface SuggestedActionsProps {
 function PureSuggestedActions({ chatId, append }: SuggestedActionsProps) {
   const suggestedActions = [
     {
-      title: 'Co je ETF?',
+      title: 'Jak začít s metodou RUŠ?',
       label: '',
-      action: 'Co je ETF?',
+      action: 'Jak začít s metodou RUŠ?',
     },
     {
-      title: 'Jaké jsou tržní trendy?',
+      title: 'Jaké problémy řeší RUŠ?',
       label: '',
-      action: 'Jaké jsou tržní trendy?',
+      action: 'Jaké problémy dokáže Metoda RUŠ pomoci vyřešit?',
     },
     {
-      title: 'Co je to Bull Market?',
+      title: 'Jak dlouho trvá terapie?',
       label: '',
-      action: 'Co je to Bull Market?',
+      action: 'Jak dlouho obvykle trvá terapie metodou RUŠ a kolik sezení je potřeba?',
     },
     {
-      title: 'Mám se zajímat o investování?',
+      title: 'Jak poznat, že mi to pomáhá?',
       label: '',
-      action: 'Mám se zajímat o investování?',
+      action: 'Jaké jsou znaky toho, že mi metoda RUŠ skutečně pomáhá?',
     },
   ];
 

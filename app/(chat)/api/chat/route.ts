@@ -26,6 +26,36 @@ import { getWeather } from '@/lib/ai/tools/get-weather';
 import { isProductionEnvironment } from '@/lib/constants';
 import { myProvider } from '@/lib/ai/providers';
 
+// Function to extract answer content from a message
+const extractAnswer = (message: string) => {
+  const answerTagRegex = /<answer>(.*?)(?:<\/answer>|$)/s;
+  const match = message.match(answerTagRegex);
+  
+  if (match && match[1]) {
+    // Return the content between answer tags (or until end if no closing tag)
+    return match[1].trim();
+  }
+  
+  // No answer tag found, return the original message
+  return message;
+};
+
+// Function to process message parts for database storage
+const processMessagePartsForStorage = (parts: any[]) => {
+  if (!parts || !Array.isArray(parts)) return parts;
+  
+  return parts.map(part => {
+    if (part.type === 'text' && typeof part.text === 'string') {
+      // Extract only the answer content for storage
+      return {
+        ...part,
+        text: extractAnswer(part.text)
+      };
+    }
+    return part;
+  });
+};
+
 export const maxDuration = 60;
 
 export async function POST(request: Request) {
@@ -66,18 +96,18 @@ export async function POST(request: Request) {
       }
     }
 
-    await saveMessages({
-      messages: [
-        {
-          chatId: id,
-          id: userMessage.id,
-          role: 'user',
-          parts: userMessage.parts,
-          attachments: userMessage.experimental_attachments ?? [],
-          createdAt: new Date(),
-        },
-      ],
-    });
+    // await saveMessages({
+    //   messages: [
+    //     {
+    //       chatId: id,
+    //       id: userMessage.id,
+    //       role: 'user',
+    //       parts: userMessage.parts,
+    //       attachments: userMessage.experimental_attachments ?? [],
+    //       createdAt: new Date(),
+    //     },
+    //   ],
+    // });
 
     return createDataStreamResponse({
       execute: (dataStream) => {
@@ -124,21 +154,24 @@ export async function POST(request: Request) {
                   responseMessages: response.messages,
                 });
 
-                await saveMessages({
-                  messages: [
-                    {
-                      id: assistantId,
-                      chatId: id,
-                      role: assistantMessage.role,
-                      parts: assistantMessage.parts,
-                      attachments:
-                        assistantMessage.experimental_attachments ?? [],
-                      createdAt: new Date(),
-                    },
-                  ],
-                });
+                // // Process parts to extract only the answer content for storage
+                // const processedParts = assistantMessage.parts ? processMessagePartsForStorage(assistantMessage.parts) : [];
+
+                // await saveMessages({
+                //   messages: [
+                //     {
+                //       id: assistantId,
+                //       chatId: id,
+                //       role: assistantMessage.role,
+                //       parts: processedParts,
+                //       attachments:
+                //         assistantMessage.experimental_attachments ?? [],
+                //       createdAt: new Date(),
+                //     },
+                //   ],
+                // });
               } catch (error) {
-                console.error('Failed to save chat');
+                console.error('Failed to save chat', error);
               }
             }
           },

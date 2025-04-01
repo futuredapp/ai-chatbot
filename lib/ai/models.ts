@@ -9,7 +9,7 @@ interface ChatModel {
 export const chatModels: Array<ChatModel> = [
   {
     id: 'chat-model-custom',
-    name: 'Investing Assistant',
-    description: 'Investing Assistant for stock market analysis and recommendations',
+    name: 'Karel Nejedly',
+    description: 'Karel Nejedlý - tvůrce programu',
   }
 ];

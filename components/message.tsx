@@ -6,7 +6,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { memo, useState } from 'react';
 import type { Vote } from '@/lib/db/schema';
 import { DocumentToolCall, DocumentToolResult } from './document';
-import { PencilEditIcon, SparklesIcon } from './icons';
+import { PencilEditIcon, SparklesIcon, PlayIcon, StopIcon } from './icons';
 import { Markdown } from './markdown';
 import { MessageActions } from './message-actions';
 import { PreviewAttachment } from './preview-attachment';
@@ -123,7 +123,11 @@ const PurePreviewMessage = ({
                             message.role === 'user',
                         })}
                       >
-                        <Markdown>{part.text}</Markdown>
+                        {message.role === 'assistant' && part.text.includes('<thinking>') ? (
+                          <ParsedMessage text={part.text} />
+                        ) : (
+                          <Markdown>{part.text}</Markdown>
+                        )}
                       </div>
                     </div>
                   );
@@ -267,10 +271,119 @@ export const ThinkingMessage = () => {
 
         <div className="flex flex-col gap-2 w-full">
           <div className="flex flex-col gap-4 text-muted-foreground">
-            Hmm...
+            Přemýšlím o vašem problému...
           </div>
         </div>
       </div>
     </motion.div>
+  );
+};
+
+export const AudioLoadingMessage = () => {
+  const role = 'assistant';
+
+  return (
+    <motion.div
+      data-testid="message-audio-loading"
+      className="w-full mx-auto max-w-3xl px-4 group/message"
+      initial={{ y: 5, opacity: 0 }}
+      animate={{ y: 0, opacity: 1, transition: { delay: 0.5 } }}
+      data-role={role}
+    >
+      <div className="flex justify-center w-full">
+        <div className="flex items-center gap-4 py-3 px-5 rounded-xl bg-blue-50 dark:bg-blue-950/40 border border-blue-100 dark:border-blue-900/30 shadow-sm">
+          <div className="size-8 flex items-center rounded-full justify-center ring-1 shrink-0 ring-blue-200 dark:ring-blue-700 bg-blue-100 dark:bg-blue-900/50">
+            <div className="translate-y-px animate-pulse text-blue-600 dark:text-blue-400">
+              <PlayIcon size={14} />
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2.5">
+            <div className="flex items-center gap-1.5">
+              <div className="h-2 w-2 rounded-full bg-blue-400 dark:bg-blue-500 animate-pulse"></div>
+              <div className="h-2 w-2 rounded-full bg-blue-400 dark:bg-blue-500 animate-pulse" style={{ animationDelay: '0.3s' }}></div>
+              <div className="h-2 w-2 rounded-full bg-blue-400 dark:bg-blue-500 animate-pulse" style={{ animationDelay: '0.6s' }}></div>
+            </div>
+            <span className="text-sm font-medium text-blue-700 dark:text-blue-300">Preparing audio...</span>
+          </div>
+        </div>
+      </div>
+    </motion.div>
+  );
+};
+
+export const AudioPlayingMessage = ({ onStopClick }: { onStopClick?: () => void }) => {
+  const role = 'assistant';
+  
+  return (
+    <motion.div
+      data-testid="message-audio-playing"
+      className="w-full mx-auto max-w-3xl px-4 group/message"
+      initial={{ y: 5, opacity: 0 }}
+      animate={{ y: 0, opacity: 1 }}
+      data-role={role}
+    >
+      <div className="flex justify-center w-full">
+        <div className="flex items-center gap-4 py-3 px-5 rounded-xl bg-blue-50 dark:bg-blue-950/40 border border-blue-100 dark:border-blue-900/30 shadow-sm">
+          <div className="size-8 flex items-center rounded-full justify-center ring-1 shrink-0 ring-blue-200 dark:ring-blue-700 bg-blue-100 dark:bg-blue-900/50">
+            <div className="translate-y-px text-blue-600 dark:text-blue-400">
+              <PlayIcon size={14} />
+            </div>
+          </div>
+
+          <div className="flex items-center gap-3">
+            <div className="flex items-end gap-1 h-5">
+              <div className="h-2 w-1.5 bg-blue-400 dark:bg-blue-400 rounded-full animate-[soundwave_0.8s_ease-in-out_infinite]" 
+                   style={{ animationDelay: '0s' }}></div>
+              <div className="h-3 w-1.5 bg-blue-500 dark:bg-blue-500 rounded-full animate-[soundwave_1.1s_ease-in-out_infinite]" 
+                   style={{ animationDelay: '0.1s' }}></div>
+              <div className="h-5 w-1.5 bg-blue-600 dark:bg-blue-600 rounded-full animate-[soundwave_0.7s_ease-in-out_infinite]" 
+                   style={{ animationDelay: '0.15s' }}></div>
+              <div className="h-4 w-1.5 bg-blue-500 dark:bg-blue-500 rounded-full animate-[soundwave_0.9s_ease-in-out_infinite]" 
+                   style={{ animationDelay: '0.2s' }}></div>
+              <div className="h-2 w-1.5 bg-blue-400 dark:bg-blue-400 rounded-full animate-[soundwave_0.8s_ease-in-out_infinite]" 
+                   style={{ animationDelay: '0.25s' }}></div>
+            </div>
+            <span className="text-sm font-medium text-blue-700 dark:text-blue-300">Playing audio response</span>
+          </div>
+          
+          {onStopClick && (
+            <button 
+              onClick={onStopClick}
+              className="ml-2 size-7 flex items-center justify-center rounded-full bg-blue-200 hover:bg-blue-300 dark:bg-blue-800 dark:hover:bg-blue-700 transition-colors text-blue-700 dark:text-blue-300"
+            >
+              <div className="text-blue-700 dark:text-blue-300">
+                <StopIcon size={12} />
+              </div>
+            </button>
+          )}
+        </div>
+      </div>
+    </motion.div>
+  );
+};
+
+export const ParsedMessage = ({ text }: { text: string }) => {
+  // Function to extract answer content from the message
+  const extractAnswer = (message: string) => {
+    const answerTagRegex = /<answer>(.*?)(?:<\/answer>|$)/s;
+    const match = message.match(answerTagRegex);
+    
+    if (match && match[1]) {
+      // Return the content between answer tags (or until end if no closing tag)
+      return match[1].trim();
+    }
+    
+    // No answer tag found, return Czech "thinking" message
+    return "Přemýšlím o vašem problému...";
+  };
+
+  // Extract and display only the answer content
+  const displayText = extractAnswer(text);
+
+  return (
+    <div data-testid="parsed-message-content" className="flex flex-col gap-4">
+      <Markdown>{displayText}</Markdown>
+    </div>
   );
 };
