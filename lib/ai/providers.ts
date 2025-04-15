@@ -26,7 +26,7 @@ export const myProvider = isTestEnvironment
     })
   : customProvider({
       languageModels: {
-        'chat-model-custom': openai('gpt-4o-mini'),
+        'chat-model-custom': openai('gpt-4.1-2025-04-14'),
         'chat-model-small': openai('gpt-4o-mini'),
         'chat-model-large': openai('gpt-4o'),
         'chat-model-reasoning': wrapLanguageModel({

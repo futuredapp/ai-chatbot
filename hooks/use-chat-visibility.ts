@@ -14,7 +14,7 @@ export function useChatVisibility({
   initialVisibility: VisibilityType;
 }) {
   const { mutate, cache } = useSWRConfig();
-  const history: Array<Chat> = cache.get('/api/history')?.data;
+  // const history: Array<Chat> = cache.get('/api/history')?.data;
 
   const { data: localVisibility, mutate: setLocalVisibility } = useSWR(
     `${chatId}-visibility`,
@@ -25,15 +25,17 @@ export function useChatVisibility({
   );
 
   const visibilityType = useMemo(() => {
-    if (!history) return localVisibility;
-    const chat = history.find((chat) => chat.id === chatId);
-    if (!chat) return 'private';
-    return chat.visibility;
-  }, [history, chatId, localVisibility]);
+    // if (!history) return localVisibility;
+    // const chat = history.find((chat) => chat.id === chatId);
+    // if (!chat) return 'private';
+    // return chat.visibility;
+    return localVisibility; // Always return local state when history is disabled
+  }, [/* history, */ chatId, localVisibility]);
 
   const setVisibilityType = (updatedVisibilityType: VisibilityType) => {
     setLocalVisibility(updatedVisibilityType);
 
+    /*
     mutate<Array<Chat>>(
       '/api/history',
       (history) => {
@@ -51,6 +53,7 @@ export function useChatVisibility({
       },
       { revalidate: false },
     );
+    */
 
     updateChatVisibility({
       chatId: chatId,

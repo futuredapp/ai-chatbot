@@ -19,6 +19,18 @@ import { MessageEditor } from './message-editor';
 import { DocumentPreview } from './document-preview';
 import { MessageReasoning } from './message-reasoning';
 import { UseChatHelpers } from '@ai-sdk/react';
+import { userMap } from '@/lib/ai/tools/request-money-transfer';
+import {
+  AlertDialog,
+  AlertDialogTrigger,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogFooter,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogAction,
+  AlertDialogCancel,
+} from './ui/alert-dialog';
 
 const PurePreviewMessage = ({
   chatId,
@@ -160,7 +172,11 @@ const PurePreviewMessage = ({
                         skeleton: ['getWeather'].includes(toolName),
                       })}
                     >
-                      {toolName === 'getWeather' ? (
+                      {toolName === 'requestMoneyTransfer' ? (
+                        <MoneyTransferToolUI args={args} />
+                      ) : toolName === 'requestFreezeCard' ? (
+                        <FreezeCardToolUI args={args} />
+                      ) : toolName === 'getWeather' ? (
                         <Weather />
                       ) : toolName === 'createDocument' ? (
                         <DocumentPreview isReadonly={isReadonly} args={args} />
@@ -186,12 +202,14 @@ const PurePreviewMessage = ({
 
                   return (
                     <div key={toolCallId}>
-                      {toolName === 'getWeather' ? (
-                        <Weather weatherAtLocation={result} />
+                      {toolName === 'requestMoneyTransfer' ? (
+                        <MoneyTransferResult result={result} />
+                      ) : toolName === 'requestFreezeCard' ? (
+                        <FreezeCardResult result={result} />
                       ) : toolName === 'createDocument' ? (
                         <DocumentPreview
                           isReadonly={isReadonly}
-                          result={result}
+                          result={result}   
                         />
                       ) : toolName === 'updateDocument' ? (
                         <DocumentToolResult
@@ -274,3 +292,193 @@ export const ThinkingMessage = () => {
     </motion.div>
   );
 };
+
+// MoneyTransferConfirmation component
+function MoneyTransferConfirmation({ userId, amount, onConfirm }: { userId: string; amount: number; onConfirm: () => void }) {
+  const user = userMap[userId];
+  return (
+    <div className="flex flex-col gap-4 p-4 rounded-xl border bg-white shadow-md" style={{ borderColor: '#95AF00' }}>
+      <div className="text-lg font-semibold text-[#95AF00]">Potvrdenie prevodu</div>
+      <div className="text-base text-gray-800">
+        Naozaj chcete poslať <span className="font-bold">{amount} €</span> používateľovi <span className="font-bold">{user?.name || userId}</span>?
+      </div>
+      {user && (
+        <div className="text-sm text-gray-600">
+          IBAN: <span className="font-mono">{user.eBankCode}</span>
+        </div>
+      )}
+      <Button style={{ backgroundColor: '#95AF00', color: 'white' }} onClick={onConfirm}>
+        Odoslať
+      </Button>
+    </div>
+  );
+}
+
+// Dummy transaction dialog
+function MoneyTransferDialog({ open, onOpenChange, userId, amount }: { open: boolean; onOpenChange: (open: boolean) => void; userId: string; amount: number }) {
+  const user = userMap[userId];
+  return (
+    <AlertDialog open={open} onOpenChange={onOpenChange}>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Transakcia odoslaná</AlertDialogTitle>
+          <AlertDialogDescription>
+            <div className="flex flex-col gap-2">
+              <span>Odoslali ste <span className="font-bold">{amount} €</span> používateľovi <span className="font-bold">{user?.name || userId}</span>.</span>
+              {user && <span>IBAN: <span className="font-mono">{user.eBankCode}</span></span>}
+              <span className="text-[#95AF00] font-semibold">Transakcia bola úspešne spracovaná.</span>
+            </div>
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogAction style={{ backgroundColor: '#95AF00', color: 'white' }}>Zavrieť</AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+  );
+}
+
+// Add the MoneyTransferToolUI component:
+function MoneyTransferToolUI({ args }: { args: any }) {
+  const [dialogOpen, setDialogOpen] = useState(false);
+  if (!args?.userId || !args?.amountInEuros) return null;
+  return (
+    <>
+      <MoneyTransferConfirmation
+        userId={args.userId}
+        amount={args.amountInEuros}
+        onConfirm={() => setDialogOpen(true)}
+      />
+      <MoneyTransferDialog
+        open={dialogOpen}
+        onOpenChange={setDialogOpen}
+        userId={args.userId}
+        amount={args.amountInEuros}
+      />
+    </>
+  );
+}
+
+// Add this component near the other money transfer components
+function MoneyTransferResult({ result }: { result: { userId: string; amountInEuros: number } }) {
+  const user = userMap[result.userId];
+  const [dialogOpen, setDialogOpen] = useState(false);
+  return (
+    <>
+      <div className="flex flex-col gap-4 p-4 rounded-xl border bg-white shadow-md" style={{ borderColor: '#95AF00' }}>
+        <div className="text-lg font-semibold text-[#95AF00]">Žiadosť o odoslanie peňazí</div>
+        <div className="text-base text-gray-800">
+          Chcete odoslať <span className="font-bold">{result.amountInEuros} €</span> používateľovi <span className="font-bold">{user?.name || result.userId}</span>?
+        </div>
+        {user && (
+          <div className="text-sm text-gray-600">
+            IBAN: <span className="font-mono">{user.eBankCode}</span>
+          </div>
+        )}
+        <Button style={{ backgroundColor: '#95AF00', color: 'white' }} onClick={() => setDialogOpen(true)}>
+          Potvrdiť odoslanie
+        </Button>
+      </div>
+      <AlertDialog open={dialogOpen} onOpenChange={setDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Poslať peniaze</AlertDialogTitle>
+            <AlertDialogDescription>
+              <div className="flex flex-col gap-2">
+                <span>Požiadavka na odoslanie <span className="font-bold">{result.amountInEuros} €</span> používateľovi <span className="font-bold">{user?.name || result.userId}</span>.</span>
+                {user && <span>IBAN: <span className="font-mono">{user.eBankCode}</span></span>}
+              </div>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogAction style={{ backgroundColor: '#95AF00', color: 'white' }}>Zavrieť</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
+  );
+}
+
+// FreezeCardConfirmation component
+function FreezeCardConfirmation({ onConfirm }: { onConfirm: () => void }) {
+  return (
+    <div className="flex flex-col gap-4 p-4 rounded-xl border bg-white shadow-md" style={{ borderColor: '#E53935' }}>
+      <div className="text-lg font-semibold text-[#E53935]">Chcete zablokovať svoju kartu?</div>
+      <div className="text-base text-gray-800">
+        Počas zablokovania karty nebude možné vykonávať žiadne platby ani výbery. Kartu môžete kedykoľvek opäť odblokovať v aplikácii.
+      </div>
+      <Button style={{ backgroundColor: '#E53935', color: 'white' }} onClick={onConfirm}>
+        Zablokovať kartu
+      </Button>
+    </div>
+  );
+}
+
+// FreezeCardDialog component
+function FreezeCardDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (open: boolean) => void }) {
+  return (
+    <AlertDialog open={open} onOpenChange={onOpenChange}>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Karta bola zablokovaná</AlertDialogTitle>
+          <AlertDialogDescription>
+            <div className="flex flex-col gap-2">
+              <span>Vaša karta bola úspešne zablokovaná. Nebude možné vykonávať žiadne platby ani výbery, kým ju opäť neodblokujete.</span>
+              <span className="text-[#E53935] font-semibold">Kartu môžete kedykoľvek odblokovať v aplikácii.</span>
+            </div>
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogAction style={{ backgroundColor: '#E53935', color: 'white' }}>Zavrieť</AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+  );
+}
+
+// FreezeCardToolUI component
+function FreezeCardToolUI({ args }: { args: any }) {
+  const [dialogOpen, setDialogOpen] = useState(false);
+  // args can be used for future extension (e.g., card info)
+  return (
+    <>
+      <FreezeCardConfirmation onConfirm={() => setDialogOpen(true)} />
+      <FreezeCardDialog open={dialogOpen} onOpenChange={setDialogOpen} />
+    </>
+  );
+}
+
+// FreezeCardResult component
+function FreezeCardResult({ result }: { result: any }) {
+  // result can be used for future extension (e.g., card info)
+  const [dialogOpen, setDialogOpen] = useState(false);
+  return (
+    <>
+      <div className="flex flex-col gap-4 p-4 rounded-xl border bg-white shadow-md" style={{ borderColor: '#E53935' }}>
+        <div className="text-lg font-semibold text-[#E53935]">Chcete zablokovať svoju kartu?</div>
+        <div className="text-base text-gray-800">
+        Počas zablokovania karty nebude možné vykonávať žiadne platby ani výbery. Kartu môžete kedykoľvek opäť odblokovať v aplikácii.
+        </div>
+        <Button style={{ backgroundColor: '#E53935', color: 'white' }} onClick={() => setDialogOpen(true)}>
+          Zavrieť
+        </Button>
+      </div>
+      <AlertDialog open={dialogOpen} onOpenChange={setDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Karta bola zablokovaná</AlertDialogTitle>
+            <AlertDialogDescription>
+              <div className="flex flex-col gap-2">
+                <span>Vaša karta bola úspešne zablokovaná. Nebude možné vykonávať žiadne platby ani výbery, kým ju opäť neodblokujete.</span>
+                <span className="text-[#E53935] font-semibold">Kartu môžete kedykoľvek odblokovať v aplikácii.</span>
+              </div>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogAction style={{ backgroundColor: '#E53935', color: 'white' }}>Zavrieť</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
+  );
+}

@@ -16,24 +16,24 @@ interface SuggestedActionsProps {
 function PureSuggestedActions({ chatId, append }: SuggestedActionsProps) {
   const suggestedActions = [
     {
-      title: 'Co je ETF?',
+      title: 'Aký je môj zostatok na účte?',
       label: '',
-      action: 'Co je ETF?',
+      action: 'Aký je môj zostatok na účte?',
     },
     {
-      title: 'Jaké jsou tržní trendy?',
+      title: 'Aké typy účtov máte?',
       label: '',
-      action: 'Jaké jsou tržní trendy?',
+      action: 'Aké typy účtov máte?',
     },
     {
-      title: 'Co je to Bull Market?',
+      title: 'Chcem poslať peniaze',
       label: '',
-      action: 'Co je to Bull Market?',
+      action: 'Chcem poslať peniaze',
     },
     {
-      title: 'Mám se zajímat o investování?',
+      title: 'Ukradli mi kartu čo mám robiť?',
       label: '',
-      action: 'Mám se zajímat o investování?',
+      action: 'Ukradli mi kartu čo mám robiť?',
     },
   ];
 

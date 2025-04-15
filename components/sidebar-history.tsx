@@ -153,17 +153,20 @@ export function SidebarHistory({ user }: { user: User | undefined }) {
   const { setOpenMobile } = useSidebar();
   const { id } = useParams();
   const pathname = usePathname();
-  const {
-    data: history,
-    isLoading,
-    mutate,
-  } = useSWR<Array<Chat>>(user ? '/api/history' : null, fetcher, {
-    fallbackData: [],
-  });
+  // const {
+  //   data: history,
+  //   isLoading,
+  //   mutate,
+  // } = useSWR<Array<Chat>>(user ? '/api/history' : null, fetcher, {
+  //   fallbackData: [],
+  // });
+  const history: Array<Chat> = []; // Mock empty history
+  const isLoading = false; // Mock loading state
+  const mutate = () => {}; // Mock mutate function
 
-  useEffect(() => {
-    mutate();
-  }, [pathname, mutate]);
+  // useEffect(() => {
+  //   mutate();
+  // }, [pathname, mutate]);
 
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
@@ -176,11 +179,11 @@ export function SidebarHistory({ user }: { user: User | undefined }) {
     toast.promise(deletePromise, {
       loading: 'Deleting chat...',
       success: () => {
-        mutate((history) => {
-          if (history) {
-            return history.filter((h) => h.id !== id);
-          }
-        });
+        // mutate((history) => {
+        //   if (history) {
+        //     return history.filter((h) => h.id !== id);
+        //   }
+        // });
         return 'Chat deleted successfully';
       },
       error: 'Failed to delete chat',

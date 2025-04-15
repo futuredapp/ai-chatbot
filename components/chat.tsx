@@ -56,7 +56,7 @@ export function Chat({
     generateId: generateUUID,
     onFinish: () => {
       console.log('[DEBUG] useChat onFinish triggered');
-      mutate('/api/history');
+      // mutate('/api/history');
     },
     onError: (error) => {
       console.error('[DEBUG] useChat onError:', error);
